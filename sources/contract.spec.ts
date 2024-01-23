@@ -93,7 +93,7 @@ describe("contract", () => {
                   },
                   {
                     "$type": "processed",
-                    "gasUsed": 8176n,
+                    "gasUsed": 8248n,
                   },
                   {
                     "$type": "sent",
@@ -107,7 +107,7 @@ describe("contract", () => {
                         "from": "@main",
                         "to": "@treasure(owner)",
                         "type": "internal",
-                        "value": "0.990604",
+                        "value": "0.990532",
                       },
                     ],
                   },
@@ -157,7 +157,7 @@ describe("contract", () => {
                       "from": "@main",
                       "to": "@treasure(non-owner)",
                       "type": "internal",
-                      "value": "0.995112",
+                      "value": "0.99504",
                     },
                   },
                 ],

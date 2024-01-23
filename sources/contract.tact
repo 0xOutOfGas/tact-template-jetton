@@ -1,39 +1,44 @@
-import "@stdlib/deploy";
+import "./jetton";
 
-message Add {
-    amount: Int as uint32;
+message Mint {
+    amount: Int;
+    receiver: Address;
 }
 
-contract SampleTactContract with Deployable {
-
+contract SampleJetton with Jetton {
+    total_supply: Int as coins;
     owner: Address;
-    counter: Int as uint32;
+    content: Cell;
+    mintable: Bool;
 
-    init(owner: Address) {
+    max_supply: Int as coins; // Extract parameter we set here. The Jetton Standards doesn't have this parameter.
+
+    init(owner: Address, content: Cell, max_supply: Int) {
+        self.total_supply = 0;
         self.owner = owner;
-        self.counter = 0;
+        self.mintable = true;
+        self.content = content;
+        self.max_supply = max_supply;
     }
 
-    fun add(v: Int) {
-        
-        // Check sender
+    receive(msg: Mint) { // 0xfc708bd2
         let ctx: Context = context();
-        require(ctx.sender == self.owner, "Invalid sender");
-        
-        // Update counter
-        self.counter = (self.counter + v);
+        require(ctx.sender == self.owner, "Not owner");
+        require(self.mintable, "Not mintable");
+        require(self.total_supply + msg.amount <= self.max_supply, "Max supply exceeded");
+        self.mint(msg.receiver, msg.amount, self.owner); // (to, amount, response_destination)
     }
 
-    receive(msg: Add) {
-        self.add(msg.amount);
+    receive("Mint: 100") { // Public Minting
+        let ctx: Context = context();
+        require(self.mintable, "Not mintable");
+        require(self.total_supply + 100 <= self.max_supply, "Max supply exceeded");
+        self.mint(ctx.sender, 100, self.owner); // 🔴 
     }
 
-    receive("increment") {
-        self.add(1);
-        self.reply("incremented".asComment());
+    receive("Owner: MintClose") {
+        let ctx: Context = context();
+        require(ctx.sender == self.owner, "Not owner");
+        self.mintable = false;
     }
-
-    get fun counter(): Int {
-        return self.counter;
-    }
-}
+} 
